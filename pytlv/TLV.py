@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import binascii
+import binascii, math
 from collections import OrderedDict
 
 #known_tags = ['82', '8A', '95', '9A', '9F10', '9F26', '9F36', '9F37', '9F1A']
@@ -206,12 +206,19 @@ class TLV:
 				for tag, tag_name in self.tags.items():
 					if self.tlv_string[i:i+tag_length] == tag:
 						try:
-							value_length = int(self.tlv_string[i+tag_length:i+tag_length+2], 16)
+							value_len = int(self.tlv_string[i+tag_length:i+tag_length+2], 16)
+							if (value_len) < 128:
+								len_offset = 2
+								value_length = value_len;
+							else:
+								len_size = value_len & 0xF # implicit max. length size = 0x0F
+								value_length = int(self.tlv_string[i+tag_length+2:i+tag_length+2+len_size*2], 16)
+								len_offset = 2 + len_size * 2
 						except ValueError:
 							raise ValueError('Parse error: tag ' + tag + ' has incorrect data length')
 
-						value_start_position = i+tag_length+2
-						value_end_position = i+tag_length+2+value_length*2
+						value_start_position = i+tag_length+len_offset
+						value_end_position = i+tag_length+len_offset+value_length*2
 
 						if value_end_position > len(self.tlv_string):
 							raise ValueError('Parse error: tag ' + tag + ' declared data of length ' + str(value_length) + ', but actual data length is ' + str(int(len(self.tlv_string[value_start_position-1:-1])/2)))
@@ -239,7 +246,13 @@ class TLV:
 			if divmod(len(value), 2)[1] == 1:
 				raise ValueError('Invalid value length - the length must be even')
 
-			self.tlv_string = self.tlv_string + tag.upper() + hexify(len(value) / 2) + value.upper()
+			if (len(value) / 2) < 128:
+				len_str = hexify(len(value) / 2);
+			else:
+				len_size = math.ceil((len(value) / 2).bit_length() / 8.0) # no check for length size > 0x0F
+				len_str = hex(0x80 | (int(len_size) & 0xF))[2:] + hexify(len(value) / 2)
+
+			self.tlv_string = self.tlv_string + tag.upper() + len_str + value.upper()
 
 		return self.tlv_string
 

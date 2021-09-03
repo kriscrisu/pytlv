@@ -1,12 +1,11 @@
-
-TLV parser
+TLV (tag length lavue) data parser, especially useful for [EMV](http://emvco.com) tags parsing
+Limitations: tag length can occupy at most 15 bytes
 
 To import the pytlv module in your code:
 ```python
 from pytlv.TLV import *
 
 ```
-
 
 To parse data from a TLV string:
 ```python

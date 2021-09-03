@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pytlv',
-      version='0.69',
+      version='0.72',
       
       description='TLV(tag length lavue) data parser',
       long_description=open('README.md').read(),
@@ -10,6 +10,7 @@ setup(name='pytlv',
         'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
         'Operating System :: OS Independent',
         
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
